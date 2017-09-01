@@ -16,21 +16,6 @@
 <script>
   $(function() {
 
-    $('#new-form').submit(function(event) {
-      event.preventDefault();
-      var textbox = $('.new-todo');
-      // console.log("Task: ", textbox.val());
-      var payload = {
-        task: {
-          title: textbox.val()
-        }
-      };
-      // console.log(payload);
-      $.post("/tasks", payload).success(function(data) {
-        console.log("Successful HTTP Request");
-      });
-    });
-
     // The taskHtml method takes in a JavaScript representation
     // of the task and produces an HTML representation using
     // <li> tags
@@ -73,5 +58,26 @@
       ulTodos.html(htmlString);
       $('.toggle').change(toggleTask);
     });
+
+
+    $('#new-form').submit(function(event) {
+      event.preventDefault();
+      var textbox = $('.new-todo');
+      // console.log("Task: ", textbox.val());
+      var payload = {
+        task: {
+          title: textbox.val()
+        }
+      };
+      // console.log(payload);
+      $.post("/tasks", payload).success(function(data) {
+        // console.log(data);
+        var htmlString = taskHtml(data);
+        var ulTodos = $('.todo-list');
+        ulTodos.append(htmlString);
+        $('.toggle').click(toggleTask);
+      });
+    });
+
   });
 </script>
