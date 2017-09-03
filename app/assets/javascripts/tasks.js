@@ -6,13 +6,12 @@ $(function() {
   function taskHtml(task) {
     var checkedStatus = task.done ? "checked" : "";
     var liClass = task.done ? "completed" : "";
-    var liElement = '<li id="listItem-' + task.id +'" class="' + liClass + '">' +
-    '<div class="view"><input class="toggle" type="checkbox"' +
-      " data-id='" + task.id + "'" +
-      checkedStatus +
-      '><label>' +
-       task.title +
-       '</label></div></li>';
+    var liElement = '<li id="listItem-' + task.id + '" class="' + liClass + '">'
+    + '<div class="view">'
+    + '<input class="toggle" type="checkbox" data-id=' + task.id + ' ' + checkedStatus + '>'
+    + '<label>' + task.title + '</label>'
+    + '<button class="destroy" data-id=' + task.id + '></button>'
+    + '</div></li>';
 
     return liElement;
   }
@@ -23,9 +22,8 @@ $(function() {
   // the value of the `done` field
   function toggleTask(e) {
     var itemId = $(e.target).data("id");
-    // console.log(itemId);
     var doneValue = Boolean($(e.target).is(':checked'));
-    // console.log("done:", doneValue);
+    console.log('toggleTask ' + itemId + ', done:' + doneValue + ' ' + e.target);
     $.post("/tasks/" + itemId, {
       _method: "PUT",
       task: {
@@ -33,24 +31,45 @@ $(function() {
       }
     }).success(function(data) {
       var liHtml = taskHtml(data);
-      // console.log(liHtml);
+      console.log('/tasks/' + itemId + ' put success, ' + data.id);
       var $li = $("#listItem-" + data.id);
       $li.replaceWith(liHtml);
       $('.toggle').change(toggleTask);
     } );
   }
 
-  $.get("/tasks").success( function( data ) {
+  // deleteTask deletes the selected task and
+  // reload the task list
+  function deleteTask(e) {
+    var itemId = $(e.target).data("id");
+    console.log('deleteTask ' + itemId + ' ' + e.target);
+    $.post("/tasks/" + itemId, {
+      _method: "DELETE"
+    }).success(function(data) {
+      loadTasks(data);
+    } );
+  }
+
+  function loadTasks(data) {
     var htmlString = "";
     $.each(data, function(index,  task) {
-      htmlString += taskHtml(task);
+      htmlString += taskHtml(task);       // create html for each task
     });
     // console.log(htmlString);
     var ulTodos = $('.todo-list');
-    ulTodos.html(htmlString);
-    $('.toggle').change(toggleTask);
+    ulTodos.html(htmlString);             // insert the tasks to page
+    $('.toggle').change(toggleTask); 
+  }
+
+  // Create the task list on loading
+  $.get("/tasks").success(function(data) {
+    loadTasks(data);
   });
 
+  // Attach events to dynamtic created elements
+  $('.todo-list').on('click', '.destroy', function(event) {
+    deleteTask(event);
+  });
 
   $('#new-form').submit(function(event) {
     event.preventDefault();
