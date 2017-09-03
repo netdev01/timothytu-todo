@@ -3,6 +3,7 @@ class TasksController < ApplicationController
   def index
     # render json: Task.all
     render json: Task.order(:id)
+    # render json: Task.order("done ASC, id DESC")
   end
 
   def update
