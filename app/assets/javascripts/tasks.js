@@ -58,7 +58,7 @@ $(function() {
       _method: "DELETE"
     }).success(function(data) {
       var $li = $("#listItem-" + itemId);
-      console.log($li);
+      // console.log($li);
       $li.remove();
     } );
   });
