@@ -23,7 +23,7 @@ $(function() {
   function toggleTask(e) {
     var itemId = $(e.target).data("id");
     var doneValue = Boolean($(e.target).is(':checked'));
-    console.log('toggleTask ' + itemId + ', done:' + doneValue + ' ' + e.target);
+    // console.log('toggleTask ' + itemId + ', done:' + doneValue + ' ' + e.target);
     $.post("/tasks/" + itemId, {
       _method: "PUT",
       task: {
@@ -31,48 +31,40 @@ $(function() {
       }
     }).success(function(data) {
       var liHtml = taskHtml(data);
-      console.log('/tasks/' + itemId + ' put success, ' + data.id);
+      // console.log('/tasks/' + itemId + ' put success, ' + data.id);
       var $li = $("#listItem-" + data.id);
       $li.replaceWith(liHtml);
       $('.toggle').change(toggleTask);
     } );
   }
 
-  // deleteTask deletes the selected task and
-  // reload the task list
-  function deleteTask(e) {
-    var itemId = $(e.target).data("id");
-    console.log('deleteTask ' + itemId + ' ' + e.target);
-    $.post("/tasks/" + itemId, {
-      _method: "DELETE"
-    }).success(function(data) {
-      loadTasks(data);
-    } );
-  }
-
-  function loadTasks(data) {
+  // Create the task list on loading
+  $.get("/tasks").success(function(data) {
     var htmlString = "";
     $.each(data, function(index,  task) {
       htmlString += taskHtml(task);       // create html for each task
     });
-    // console.log(htmlString);
     var ulTodos = $('.todo-list');
     ulTodos.html(htmlString);             // insert the tasks to page
     $('.toggle').change(toggleTask); 
-  }
-
-  // Create the task list on loading
-  $.get("/tasks").success(function(data) {
-    loadTasks(data);
   });
 
+  // Delete a selected task
   // Attach events to dynamtic created elements
-  $('.todo-list').on('click', '.destroy', function(event) {
-    deleteTask(event);
+  $('.todo-list').on('click', '.destroy', function(e) {
+    var itemId = $(e.target).data("id");
+    // console.log('deleteTask ' + itemId + ' ' + e.target);
+    $.post("/tasks/" + itemId, {
+      _method: "DELETE"
+    }).success(function(data) {
+      var $li = $("#listItem-" + itemId);
+      console.log($li);
+      $li.remove();
+    } );
   });
 
-  $('#new-form').submit(function(event) {
-    event.preventDefault();
+  $('#new-form').submit(function(e) {
+    e.preventDefault();
     var textbox = $('.new-todo');
     // console.log("Task: ", textbox.val());
     var payload = {
